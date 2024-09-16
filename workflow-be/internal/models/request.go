@@ -17,3 +17,7 @@ type RequestItemWithID struct {
 type RequestGetItems struct {
 	Items []RequestItem `json:"items" binding:"required"`
 }
+type RequestLogin struct {
+	Username string `binding:"required"`
+	Password string `binding:"required"`
+}

@@ -48,7 +48,7 @@ func (service Service) UpdateItem(item models.Item) error {
 	return service.Repository.UpdateItem(&item)
 }
 // Update Status
-func (service Service) UpdateItemStatus(id int, status string) error {
+func (service Service) UpdateItemStatus(id int, status constant.ItemStatus) error {
 	return service.Repository.UpdateItemStatus(id, status)
 }
 // Delete

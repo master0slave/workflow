@@ -1,6 +1,7 @@
 package item
 
 import (
+	"workflow/internal/constant"
 	"workflow/internal/models"
 
 	"gorm.io/gorm"
@@ -36,7 +37,7 @@ func (repo Repository) UpdateItem(item *models.Item) error {
 }
 
 // Update Status
-func (repo Repository) UpdateItemStatus(id int, status string) error {
+func (repo Repository) UpdateItemStatus(id int, status constant.ItemStatus) error {
 	return repo.Database.Model(&models.Item{}).Where("id = ?", id).Update("status", status).Error
 }
 
