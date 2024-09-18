@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
-import BudgetPanel from "@/components/BudgetPanel";
+import BudgetPanel from "workflow-fe/src/components/BudgetPanel";
 import BudgetRequestDataTable from "../components/BudgetRequestDataTable";
 import Header from "@/components/Header";
 import { BudgetRequest } from "@/models/budget-request";
