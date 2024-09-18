@@ -33,22 +33,37 @@ func (service Service) CreateItem(req models.RequestItem) (models.Item, error){
 	return item, nil 
 }
 
-// Get All Items
+// // Get All Items
 func (service Service) GetItems() ([]models.Item, error) {
 	return service.Repository.GetItems()
 }
 
-// Get Item By ID
-func (service Service) GetItem(id int) (models.Item, error) {
-	return service.Repository.GetItem(id)
+// Get a single item by ID
+func (service Service) GetItem(id uint) (models.Item, error) {
+    item, err := service.Repository.GetItem(id)
+    return item, err
+}
+// Update Item By Id
+func (service Service) UpdateItem(request models.RequestItem, id uint) (*models.Item, error) {
+	// Fech item from database using repository
+	item, err := service.Repository.GetItem(id)
+	if err != nil {
+		return nil, err
+	}
+	// Update item
+	item.Title = request.Title
+	item.Amount = request.Amount
+	item.Quantity = request.Quantity
+
+	// Save item to database
+	if err := service.Repository.UpdateItem(&item);err != nil { 
+		return nil, err 
+	}
+	return &item, nil
 }
 
-// Update Item
-func (service Service) UpdateItem(item models.Item) error {
-	return service.Repository.UpdateItem(&item)
-}
 // Update Status
-func (service Service) UpdateItemStatus(id int, status constant.ItemStatus) error {
+func (service Service) UpdateItemStatus(id uint, status constant.ItemStatus) error {
 	return service.Repository.UpdateItemStatus(id, status)
 }
 // Delete

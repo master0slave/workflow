@@ -3,6 +3,8 @@ package item
 import (
 	"fmt"
 	"net/http"
+
+	"strconv"
 	"workflow/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +39,7 @@ func (controller Controller) CreateItem(c *gin.Context) {
 	item, err := controller.Service.CreateItem(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
@@ -45,8 +47,6 @@ func (controller Controller) CreateItem(c *gin.Context) {
 	// Response
 	c.JSON(http.StatusCreated, gin.H{
 		"data": item,
-	})
-	c.JSON(http.StatusCreated, gin.H{
 		"message": "Successfully created item",
 	})
 }
@@ -67,42 +67,72 @@ func (controller Controller) GetItems(c *gin.Context) {
 	})
 }
 
-//Get Item By ID
+// Get Item By ID
 func (controller Controller) GetItem(c *gin.Context) {
-	//Bind
-	var request models.RequestItemWithID
-	if err := c.Bind(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request body",
-		})
-		return
-	}
-	// Get item
-	item, err := controller.Service.GetItem(request.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
-		})
-		return
-	}
-	// Response
-	c.JSON(http.StatusOK, gin.H{
-		"data": item,
-	})
-}	
+    // Get 'id' from the query string like /items?id=1
+    idParam := c.Param("id")
 
-// Update Item
+    // Check if id was provided
+    if idParam == "" {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "message": "ID is required",
+        })
+        return
+    }
+
+    // Convert id to integer
+    id, err := strconv.Atoi(idParam)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "message": "Invalid item ID",
+        })
+        return
+    }
+
+    // Continue with your service logic
+	// convert type of id to uint
+
+	// Get item	
+    item, err := controller.Service.GetItem(uint(id))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "message": err.Error(),
+        })
+        return
+    }
+
+    // Response
+    c.JSON(http.StatusOK, gin.H{
+        "data": item,
+    })
+}
+
+// Update Item by ID
 func (controller Controller) UpdateItem(c *gin.Context) {
+	// Get the ID from URL parameters
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid item ID",
+		})
+		return
+	}
 	//Bind
-	var request models.RequestItemWithID
+	// var request models.RequestItemWithID
+	var request models.RequestItem
+
 	if err := c.Bind(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid request body",
 		})
 		return
 	}
+
+	fmt.Printf("%#v\n",request)
+
 	// Update item
-	item, err := controller.Service.UpdateItem(request)
+	item, err := controller.Service.UpdateItem(request, uint(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err,
@@ -117,8 +147,17 @@ func (controller Controller) UpdateItem(c *gin.Context) {
 
 // Update Status
 func (controller Controller) UpdateItemStatus(c *gin.Context) {
+	// Get the ID from URL parameters
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid item ID",
+		})
+		return
+	}
 	//Bind
-	var request models.RequestItem
+	var request models.RequestUpdateItemStatus
 	if err := c.Bind(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid request body",
@@ -126,10 +165,19 @@ func (controller Controller) UpdateItemStatus(c *gin.Context) {
 		return
 	}
 	// Update item
-	item, err := controller.Service.UpdateItemStatus(request.ID, request.Status)
+	err = controller.Service.UpdateItemStatus(uint(id), request.Status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// Get item
+	item, err := controller.Service.GetItem(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
 		})
 		return
 	}
@@ -141,24 +189,31 @@ func (controller Controller) UpdateItemStatus(c *gin.Context) {
 
 // Delete
 func (controller Controller) DeleteItem(c *gin.Context) {
-	//Bind
-	var request models.RequestItem
-	if err := c.Bind(&request); err != nil {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid request body",
+			"message": "Invalid item ID",
 		})
 		return
 	}
+
+	// Create a new item with the ID to delete
+    item := models.Item{
+        ID: uint(id), // Assign the ID to the item struct
+    }
+
 	// Delete item
-	item, err := controller.Service.DeleteItem(request)
+	err = controller.Service.DeleteItem(item)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
 	// Response
 	c.JSON(http.StatusOK, gin.H{	
-		"data": item,
+		"message": "Item deleted successfully",
 	})
 }

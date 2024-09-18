@@ -1,13 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+
 	"log"
 	"net/http"
 	"os"
+
 	"time"
 
-	"workflow/internal/auth"
+	// "workflow/internal/auth"
 	"workflow/internal/item"
 
 	"github.com/fvbock/endless"
@@ -29,9 +33,30 @@ func init() {
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
+
+		// Read request body
+		bodyBytes, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			log.Printf("Failed to read request body: %v", err)
+		}
+		// Restore the io.ReadCloser to its original state
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		// Log the request body
+		log.Printf("Request Body: %s", string(bodyBytes))
+
 		c.Next()
+
 		end := time.Now()
 		latency := end.Sub(start)
+
+		// Get the query parameter 'id', if it exists
+        idParam := c.Param("id")
+        if idParam == "" {
+            idParam = "N/A" // If no 'id' query parameter is provided, log it as "N/A"
+        }
+		log.Printf("id param is: %s",idParam)
+
 		log.Printf("Method: %s \nURI: %s \nStatus: %d \nLatency: %s \n\n", c.Request.Method, c.Request.RequestURI, c.Writer.Status(), latency)
 	}
 }
@@ -76,23 +101,28 @@ func main() {
 // TODO: สร้าง Group Rounter
 	// Router Registration Group
 	items := r.Group("/items")
+	items.Use(Logger())
 
-	items.Use(auth.BasicAuth([]auth.Credential{
-		{"admin", "secret"},
-	}))
+	// items.Use(auth.BasicAuth([]auth.Credential{
+	// 	{"admin", "secret"},
+	// }))
 	{
-		items.GET("", controller.GetItems) // เพิ่มข้อมูลเบิกงบใหม่ได้
-		items.GET("/:id", controller.GetItem) // ดูข้อมูลเบิกงบทั้งหมด
-		items.POST("", controller.CreateItem) // ดูข้อมูลเบิกงบที่ต้องการ
+		items.POST("", controller.CreateItem) //  เพิ่มข้อมูลเบิกงบใหม่ได้
+		items.GET("", controller.GetItems) //  ดูข้อมูลเบิกงบทั้งหมด
+		items.GET("/:id", controller.GetItem) // ดูข้อมูลเบิกงบที่ต้องการ 
 		items.PUT("/:id", controller.UpdateItem) // แก้ไขข้อมูล
 		items.PATCH("/:id", controller.UpdateItemStatus) // ปรับเปลี่ยนแก้ไขข้อมูลสถานะการเบิกงบ (เป็นสถานะ APPROVED หรือ REJECTED หรือ PENDING) 
 		items.DELETE("/:id", controller.DeleteItem) // ลบ
 	}
+	// Test
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
+
+	// Login 
+	// r.POST("/login", controller.Login)
 
 	// Start and run the server with greceful shutdown
 	if err := endless.ListenAndServe(":" + os.Getenv("PORT"), r); err != nil {

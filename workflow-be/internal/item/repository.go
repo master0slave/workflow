@@ -13,6 +13,7 @@ func NewRepository(db *gorm.DB) Repository {
 		Database: db, 
 		} 
 } 
+
 // Create
 func (repo Repository) CreateItem(item *models.Item) error { 
 	return repo.Database.Create(item).Error 
@@ -26,10 +27,17 @@ func (repo Repository) GetItems() ([]models.Item, error) {
 }
 
 // Get Item By ID
-func (repo Repository) GetItem(id int) (models.Item, error) {
+func (repo Repository) GetItem(id uint) (models.Item, error) {
 	var item models.Item
-	return item, repo.Database.First(&item, id).Error
+	if err := repo.Database.First(&item, id).Error; err != nil {
+		return item, err
+	}
+
+	return item, nil
 }
+
+
+
 
 // Update Item
 func (repo Repository) UpdateItem(item *models.Item) error {
@@ -37,7 +45,7 @@ func (repo Repository) UpdateItem(item *models.Item) error {
 }
 
 // Update Status
-func (repo Repository) UpdateItemStatus(id int, status constant.ItemStatus) error {
+func (repo Repository) UpdateItemStatus(id uint, status constant.ItemStatus) error {
 	return repo.Database.Model(&models.Item{}).Where("id = ?", id).Update("status", status).Error
 }
 
