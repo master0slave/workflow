@@ -12,7 +12,9 @@ import (
 	"time"
 
 	// "workflow/internal/auth"
+	"workflow/internal/auth"
 	"workflow/internal/item"
+	"workflow/internal/user"
 
 	"github.com/fvbock/endless"
 	"github.com/gin-contrib/cors"
@@ -98,10 +100,14 @@ func main() {
 
 	r.Use(Logger())
 
+	userController := user.NewController(db, os.Getenv("JWT_SECRET"))
+	r.POST("/login", userController.Login)
+
 // TODO: สร้าง Group Rounter
 	// Router Registration Group
 	items := r.Group("/items")
 	items.Use(Logger())
+	items.Use(auth.Guard(os.Getenv("JWT_SECRET")))
 
 	// items.Use(auth.BasicAuth([]auth.Credential{
 	// 	{"admin", "secret"},

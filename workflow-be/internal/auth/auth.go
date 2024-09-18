@@ -8,9 +8,8 @@ import (
 )
 
 func CreateToken(username string, secret string) (string, error) {
-	var t *jwt.Token
-
-	t = jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
+	// Merged variable declaration and initialization
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.RegisteredClaims{
 		Audience:  jwt.ClaimStrings{username},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Second)),
 	})
