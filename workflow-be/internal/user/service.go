@@ -26,19 +26,19 @@ func (service Service) Login(req models.RequestLogin) (string, error) {
 	// TODO: Check username and password here
 	user, err := service.Repository.FindOneByUsername(req.Username)
 	if err != nil {
-		return "", errors.New("Invalid user or password")
+		return "", errors.New("invalid user or password")
 	}
 	// req.Password // req password
 	// user.Password // hashed password
 	if ok := checkPasswordHash(req.Password, user.Password); !ok {
-		return "", errors.New("Invalid user or password")
+		return "", errors.New("invalid user or password")
 	}
 
 	// TODO: Create token here
 	token, err := auth.CreateToken(user.Username, service.secret)
 	if err != nil {
 		log.Println("Fail to create token")
-		return "", errors.New("Something went wrong")
+		return "", errors.New("something went wrong")
 	}
 
 	return token, nil

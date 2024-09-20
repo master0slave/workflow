@@ -25,6 +25,7 @@ func (controller Controller) Login(ctx *gin.Context) {
 	)
 
 	if err := ctx.Bind(&request); err != nil {
+		fmt.Println("Break")
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
@@ -40,7 +41,7 @@ func (controller Controller) Login(ctx *gin.Context) {
 	}
 	ctx.SetCookie(
 		"token",
-		fmt.Sprintf("Bearer %v", token), int(10*time.Second),
+		fmt.Sprintf("Bearer %v", token), int(3600*time.Second),
 		"/",
 		"localhost",
 		false,

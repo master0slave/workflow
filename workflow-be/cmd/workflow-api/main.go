@@ -94,7 +94,7 @@ func main() {
 	config := cors.DefaultConfig()
 
 	// frontend URL
-	config.AllowOrigins = []string{"*"}
+	config.AllowOrigins = []string{"http://localhost:3000"}
 	config.AllowCredentials = true
 	r.Use(cors.New(config))
 
@@ -109,9 +109,6 @@ func main() {
 	items.Use(Logger())
 	items.Use(auth.Guard(os.Getenv("JWT_SECRET")))
 
-	// items.Use(auth.BasicAuth([]auth.Credential{
-	// 	{"admin", "secret"},
-	// }))
 	{
 		items.POST("", controller.CreateItem) //  เพิ่มข้อมูลเบิกงบใหม่ได้
 		items.GET("", controller.GetItems) //  ดูข้อมูลเบิกงบทั้งหมด
