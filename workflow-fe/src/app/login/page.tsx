@@ -28,7 +28,7 @@ function LoginPage() {
     }
   };
   return (
-    <form className="border rounded p-4 shadow-md max-w-sm m-auto mt-10 bg-white" onSubmit={handleSubmit}>
+    <form className="border rounded p-4 shadow-md max-w-sm m-auto mt-10 bg-white" onSubmit={handleSubmit} method="POST">
     <h1 className="text-xl font-bold text-center mb-6">Please sign in</h1>
     <div className="mb-4">
       <label htmlFor="username" className="block text-sm font-medium text-gray-700">Email address</label>
