@@ -33,9 +33,10 @@ func (controller Controller) CreateItem(c *gin.Context) {
 		})
 		return
 	}
+	// Log the request body for debugging purposes
 	fmt.Printf("%#v\n",request)
 
-	// Create item
+	// Call the service to create the item
 	item, err := controller.Service.CreateItem(request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -44,9 +45,13 @@ func (controller Controller) CreateItem(c *gin.Context) {
 		return
 	}
 
-	// Response
+	// Return the created item in the response with a status code of 201
 	c.JSON(http.StatusCreated, gin.H{
-		"data": item,
+		"id":       item.ID,        // Include the item ID
+        "title":    item.Title,     // Include the title
+        "amount":   item.Amount,    // Include the amount
+        "quantity": item.Quantity,  // Include the quantity
+        "status":   item.Status,    // Include the status
 		"message": "Successfully created item",
 	})
 }
@@ -57,14 +62,21 @@ func (controller Controller) GetItems(c *gin.Context) {
 	items, err := controller.Service.GetItems()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err,
+			"message": err.Error(),
 		})
 		return
 	}
-	// Response
-	c.JSON(http.StatusOK, gin.H{
-		"data": items,
-	})
+
+	// Check if the items list is empty
+    if len(items) == 0 {
+        c.JSON(http.StatusOK, gin.H{
+            "message": "No items found",
+        })
+        return
+    }
+
+	/// Return the items list directly
+	c.JSON(http.StatusOK,items)
 }
 
 // Get Item By ID
@@ -101,10 +113,16 @@ func (controller Controller) GetItem(c *gin.Context) {
         return
     }
 
+	// Check if the item was found
+	if item.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Item not found",
+		})
+		return
+	}
+
     // Response
-    c.JSON(http.StatusOK, gin.H{
-        "data": item,
-    })
+    c.JSON(http.StatusOK, item)
 }
 
 // Update Item by ID

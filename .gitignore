@@ -2,3 +2,4 @@
 .DS_Store
 ../.DS_Store
 internal/.DS_Store
+.env

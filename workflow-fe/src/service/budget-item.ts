@@ -26,3 +26,14 @@ interface CreateBudgetItemRequest {
     const { data } = response.data;
     return data;
   };
+
+  // New function to fetch an item by its ID
+interface FetchBudgetItemByIdResponse {
+    data: BudgetRequest;
+  }
+  
+  export const fetchBudgetItemById = async (id: number): Promise<BudgetRequest> => {
+    const response = await api.get<FetchBudgetItemByIdResponse>(`/items/${id}`);
+    const { data } = response.data;
+    return data;
+  };
